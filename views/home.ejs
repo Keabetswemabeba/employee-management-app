@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include("partials/head.ejs") %>
+</head>
+
+<body>
+    <div class="motherContainer">
+        <%- include("partials/navBar.ejs") %>
+            <div class="mainContainer">
+                <div id="popUpAddId" class="addFormContainer">
+                    <span onclick="hidePopUpAdd()">X</span>
+                    <form class="form" action="/" method="post" enctype="multipart/form-data">
+                        <h2>Add Employee</h2>
+                        <input id="addEmployeeName" type="text" placeholder="Name & Surname" name="employeeName">
+                        <input id="addEmployeeId" type="number" placeholder="ID Number" name="employeeId">
+                        <input id="addEmployeeEmail" type="email" placeholder="Email Adress" name="employeeEmail">
+                        <select name="employeePosition" id="addEmployeePosition">
+                            <option name="employeePosition">Position</option>
+                            <option name="Front-End">Front-End</option>
+                            <option name="Back-End">Back-End</option>
+                            <option name="UI Designer">UI Designer</option>
+                            <option name="Project Manager">Project Manager</option>
+                        </select>
+                        <!-- <input type="text" placeholder="Position" name="employeePosition"> -->
+                        <input id="addEmployeeNumber" type="number" placeholder="Cell Number"
+                            name="employeePhoneNumber">
+                        <input type="file" name="image">
+                        <button type="submit">Add</button>
+                    </form>
+                </div>
+                <br>
+                <br>
+                <br>
+                <button onclick="popUpAdd()">Add Employee</button>
+                <div>
+                    <table>
+                        <tr>
+                            <th>Name & Surname</th>
+                            <th>ID Number</th>
+                            <th>Email Adress</th>
+                            <th>Employee Position</th>
+                            <th>Phone Number</th>
+                            <th>Operations</th>
+                        </tr>
+                        <% if(responseArray.length> 0) {%>
+                            <% responseArray.forEach((results)=>{%>
+                                <tr>
+                                    <td class="profile">
+                                        <img src=<%= results.employeeImg%> alt="">
+                                        <a href="/profile/<%= results.id %>">
+                                            <%= results.employeeName %>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <%= results.employeeId %>
+
+                                    </td>
+                                    <td>
+                                        <%= results.employeeEmail %>
+                                    </td>
+                                    <td>
+                                        <%= results.employeePosition %>
+                                    </td>
+                                    <td>
+                                        <%= results.employeePhoneNumber %>
+                                    </td>
+                                    <td>
+                                        <div class="crudBtn">
+                                            <button class="update"
+                                                onclick="openPopUp(`<%= JSON.stringify(results)%>`)">update</button>
+                                            <button class="delete"
+                                                onclick="deleteFunc(`<%= JSON.stringify(results)%>`)"
+                                                data-doc=<%=results.id %>>delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <%})%>
+                                    <%}%>
+
+                    </table>
+
+                </div>
+                <!-- Update form -->
+                <div id="popUp" class="formContainer">
+                    <span onclick="hidePopUp()">Cancel</span>
+                    <br>
+                    <br>
+                    <br>
+                    <div>
+                        <form class="form" id="updateForm">
+                            <h2>Update Employee</h2>
+                            <input type="text" placeholder="Name & Surname" name="employeeName" id="employeeName">
+                            <input type="number" placeholder="ID Number" name="employeeId" id="employeeId">
+                            <input type="email" placeholder="Email Adress" name="employeeEmail" id="employeeEmail">
+                            <select name="employeePosition" id="employeePosition">
+                                <option >Position</option>
+                                <option >Front-End</option>
+                                <option >Back-End</option>
+                                <option >UI Designer</option>
+                                <option  >Project Manager</option>
+                            </select>
+                            <!-- <input type="text" placeholder="Position" name="employeePosition"> -->
+                            <input type="number" placeholder="Cell Number" name="employeePhoneNumber"
+                                id="employeePhoneNumber">
+                            <input type="file" name="employeeImage">
+                            <button id="updateBtn">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <%- include("partials/footer.ejs") %>
+    </div>
+    <script>
+        function deleteFunc(results) {
+            const parse = JSON.parse(results)
+            console.log(results);
+            const endPoint = `delete/${parse.id}`;
+            fetch(endPoint, {
+                method: 'DELETE',
+            }).then(() => {
+                alert("deleted successfully")
+                window.location.reload()
+            }).catch((error) => {
+                console.log(error);
+            })
+        }
+
+        function openPopUp(results) {
+            const parse = JSON.parse(results)
+            console.log(results);
+            document.getElementById("popUp").style.display = 'block'
+            document.getElementById('employeeName').value = parse.employeeName
+            document.getElementById('employeeId').value = parse.employeeId
+            document.getElementById('employeeEmail').value = parse.employeeEmail
+            document.getElementById('employeePosition').value = parse.employeePosition
+            document.getElementById('employeePhoneNumber').value = parse.employeePhoneNumber
+
+
+
+            document.getElementById("updateForm").addEventListener('submit', () => {
+                const employeeName = document.getElementById('employeeName').value
+                const employeeId = document.getElementById('employeeId').value
+                const employeeEmail = document.getElementById('employeeEmail').value
+                const employeePosition = document.getElementById('employeePosition').value
+                const employeePhoneNumber = document.getElementById('employeePhoneNumber').value
+               
+                const data = {employeeName,employeeId,employeeEmail,employeePosition,employeePhoneNumber}
+                
+                // console.log(result.id);
+                const endpoint = `update/${parse.id}`
+                fetch(endpoint,{
+                    method: "PUT",
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                }).then(response => response.json()).then((data) =>{
+                    console.log(data);
+                  alert("Updated data successfully")
+                }).catch((error) =>{
+                    console.log(error);
+                })
+                
+                
+               
+            })
+        }
+
+        function popUpAdd() {
+            document.getElementById("popUpAddId").style.display = 'block'
+        }
+
+        function hidePopUp() {
+            document.getElementById("popUp").style.display = 'none'
+        }
+
+        function hidePopUpAdd() {
+            document.getElementById("popUpAddId").style.display = 'none'
+        }
+
+
+
+    </script>
+</body>
+
+</html>
